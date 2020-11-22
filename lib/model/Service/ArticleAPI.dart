@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:http/http.dart' as http;
 import 'package:webfeed/webfeed.dart';
 
-class LaReleveEtLaPesteAPI {
+class ArticleAPI {
   final String endpoint = 'https://lareleveetlapeste.fr/feed';
 
   Future<Either<Exception, String>> getFeed() async {
