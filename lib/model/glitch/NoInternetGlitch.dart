@@ -1,5 +1,5 @@
-import 'package:presse_independante/model/glitch/Glitch.dart';
+import 'package:presse_independante/model/glitch/glitch.dart';
 
 class NoInternetGlitch extends Glitch {
-  const NoInternetGlitch() : super(message: 'Unable to connect to internet');
+  NoInternetGlitch() : super(message: "Unable to connect to internet");
 }

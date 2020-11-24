@@ -10,7 +10,7 @@
 # There are other similar analysis options files in the flutter repos,
 # which should be kept in sync with this file:
 #
-#   - analysis_options.yaml (this file)
+#   - _analysis_options.yaml (this file)
 #   - packages/flutter/lib/analysis_options_user.yaml
 #   - https://github.com/flutter/plugins/blob/master/analysis_options.yaml
 #   - https://github.com/flutter/engine/blob/master/analysis_options.yaml
@@ -171,7 +171,7 @@ linter:
     - prefer_typing_uninitialized_variables
     - prefer_void_to_null
     # - provide_deprecation_message # not yet tested
-    # - public_member_api_docs # enabled on a case-by-case basis; see e.g. packages/analysis_options.yaml
+    # - public_member_api_docs # enabled on a case-by-case basis; see e.g. packages/_analysis_options.yaml
     - recursive_getters
     - slash_for_doc_comments
     # - sort_child_properties_last # not yet tested

@@ -1,0 +1,26 @@
+import 'dart:convert';
+import 'package:presse_independante/model/Service/ArticleFetcherApi.dart';
+import 'package:presse_independante/model/Service/CatPhotosApi.dart';
+import 'package:presse_independante/model/core/CatPhoto.dart';
+import 'package:presse_independante/model/glitch/NoInternetGlitch.dart';
+import 'package:presse_independante/model/glitch/glitch.dart';
+import 'package:dartz/dartz.dart';
+
+class ArticleHelper {
+  final api = ArticleFetcherApi();
+  Future<Either<Glitch, CatPhoto>> getLastArticles() async {
+    final apiResult = await api.getLastArticles();
+    return apiResult.fold((l) {
+      // There can be many types of error but, for simplicity, we are going
+      // to assume only NoInternetGlitch
+      return Left(NoInternetGlitch());
+    }, (r) {
+      // the API returns breed, id, url, width, height, category, details etc
+      // but we will take only the information we need in our app and ignore
+      // the rest
+      // here we will decode API result to CatPhoto
+      final photo = CatPhoto.fromMap(jsonDecode(r)[0]);
+      return Right(photo);
+    });
+  }
+}
