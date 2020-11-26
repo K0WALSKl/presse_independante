@@ -11,7 +11,7 @@ class HomeScreen extends StatelessWidget {
       theme: new ThemeData(
         primarySwatch: Colors.yellow,
       ),
-      home: CatGrid(),
+      home: NewsGrid(),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:after_layout/after_layout.dart';
+import 'package:presse_independante/model/core/NewsPaper.dart';
 import 'package:presse_independante/model/glitch/NoInternetGlitch.dart';
 import 'package:presse_independante/provider/ArticleProvider.dart';
 import 'package:presse_independante/provider/CatProvider.dart';
@@ -10,12 +11,12 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../getIt.dart';
 
-class CatGrid extends StatefulWidget {
+class NewsGrid extends StatefulWidget {
   @override
-  _CatGridState createState() => _CatGridState();
+  _NewsGridState createState() => _NewsGridState();
 }
 
-class _CatGridState extends State<CatGrid> with AfterLayoutMixin {
+class _NewsGridState extends State<NewsGrid> with AfterLayoutMixin {
   final provider = getIt<ArticleProvider>();
   List<Widget> articles = [];
   List<StaggeredTile> articleTiles = [];
@@ -61,20 +62,26 @@ class _CatGridState extends State<CatGrid> with AfterLayoutMixin {
   @override
   void afterFirstLayout(BuildContext context) {
     provider.getLastArticles();
+    Color randomColor = Color.fromRGBO(Random().nextInt(255),
+        Random().nextInt(255), Random().nextInt(255), 1);
     
     provider.articleStream.listen((snapshot) {
       snapshot.fold((l) {
         if (l is NoInternetGlitch) {
-          Color randomColor = Color.fromRGBO(Random().nextInt(255),
-              Random().nextInt(255), Random().nextInt(255), 1);
           articles.add(CatPhotoErrorTile(randomColor, "Unable to Connect"));
         }
       },
-          (r) => {
-                articles.add(CatPhotoTile(r.url)),
+          (r) {
+        for (int i = 0; i < r.length; i++) {
+          for (int j = 0; j < r[i].articles.length; j++) {
+            articles.add(CatPhotoErrorTile(randomColor, r[i].articles[j].title));
+            int count = Random().nextInt(4);
+            articleTiles.add(StaggeredTile.count(count, count));
+          }
+        }
+          // articles.add(CatPhotoTile(r)),
               });
-      int count = Random().nextInt(4);
-      articleTiles.add(StaggeredTile.count(count, count));
+
 
       setState(() {});
     });
@@ -82,22 +89,17 @@ class _CatGridState extends State<CatGrid> with AfterLayoutMixin {
 }
 
 class CatPhotoTile extends StatelessWidget {
-  const CatPhotoTile(this.imageUrl);
-  final String imageUrl;
+  const CatPhotoTile(this.newsPapers);
+  final List<NewsPaper> newsPapers;
   @override
   Widget build(BuildContext context) {
     return new Card(
       child: new Center(
           child: new Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius:
-                      new BorderRadius.all(const Radius.circular(10.0)),
-                  image: DecorationImage(
-                      image: NetworkImage(imageUrl), fit: BoxFit.cover),
-                ),
-              ))),
+            padding: const EdgeInsets.all(4.0),
+            child: Text(newsPapers[0].articles[0].title
+            ),
+          )),
     );
   }
 }

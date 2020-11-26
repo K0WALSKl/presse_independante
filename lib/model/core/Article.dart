@@ -1,32 +1,32 @@
 import 'dart:convert';
 
-import 'package:presse_independante/model/core/NewsPaper.dart';
-
 class Article {
   String url;
   String imageUrl;
   String title;
-  DateTime publicationDate;
   String description;
-  NewsPaper articleSource;
+  DateTime publicationDate;
+  String author;
+  String articleSource;
 
   Article({
     this.url,
     this.imageUrl,
     this.title,
-    this.publicationDate,
     this.description,
+    this.publicationDate,
+    this.author,
     this.articleSource,
   });
-
 
   Map<String, dynamic> toMap() {
     return {
       'url': url,
       'imageUrl': imageUrl,
       'title': title,
-      'publicationDate': publicationDate,
       'description': description,
+      'publicationDate': publicationDate,
+      'author': author,
       'articleSource': articleSource,
     };
   }
@@ -35,11 +35,12 @@ class Article {
     if (map == null) return null;
 
     return Article(
-      url: map['url'],
-      imageUrl: map['imageUrl'],
+      url: map['url'], // item.link
+      imageUrl: map['imageUrl'], //
       title: map['title'],
-      publicationDate: map['publicationDate'],
       description: map['description'],
+      publicationDate: DateTime.parse(map['publicationDate']), // TODO Corriger la façon dont LRELP envoie la date
+      author: map['author'],
       articleSource: map['articleSource'],
     );
   }
@@ -50,6 +51,7 @@ class Article {
 
   @override
   String toString() {
-    return 'url: $url, imageUrl: $imageUrl, title: $title, publicationDate: $publicationDate, description: $description, articleSource: $articleSource';
+    return 'url: $url, imageUrl: $imageUrl, title: $title, publicationDate: $publicationDate, description: $description, articleSource: $articleSource, author: $author';
   }
+
 }

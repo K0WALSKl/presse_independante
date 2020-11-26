@@ -1,32 +1,57 @@
 import 'dart:convert';
 
+import 'package:presse_independante/model/core/Article.dart';
+
 class NewsPaper {
   String sourceName;
-  String imageUrl;
   String url;
-  String fluxUrl;
+  String imageUrl;
   List<String> donationUrl;
+  List<Article> articles;
 
-  NewsPaper({this.sourceName, this.url, this.fluxUrl, this.donationUrl});
+  NewsPaper({this.sourceName, this.url, this.imageUrl, this.donationUrl, this.articles});
 
   Map<String, dynamic> toMap() {
     return {
       'sourceName': sourceName,
       'url': url,
-      'fluxUrl': fluxUrl,
+      'imageUrl': imageUrl,
       'donationUrl': donationUrl,
+      'articles': articles,
     };
   }
 
   static NewsPaper fromMap(Map<String, dynamic> map) {
     if (map == null) return null;
 
+    List<Article> arts = <Article>[];
+    Article tmp;
+    for (int i = 0; i < map['articles'].length; i++) {
+      tmp = Article.fromMap(map['articles'][i]);
+      tmp.articleSource = map['sourceName'];
+      arts.add(tmp);
+    }
+
     return NewsPaper(
       sourceName: map['sourceName'],
       url: map['url'],
-      fluxUrl: map['fluxUrl'],
+      imageUrl: map['imageUrl'],
       donationUrl: map['donationUrl'],
+      articles: arts,
     );
+  }
+
+  // static List<NewsPaper> newsPapersFromMap(Map<String, dynamic> map) {
+  static List<NewsPaper> newsPapersFromMap(List<dynamic> map) {
+    List<NewsPaper> npList = <NewsPaper>[];
+    if (map == null) return null;
+
+    for (int i = 0; i < map.length; i++) {
+      npList.add(NewsPaper.fromMap(map[i]));
+      print(npList[0]);
+    }
+
+    return npList;
   }
 
   String toJson(String source) => json.encode(toMap());
@@ -35,6 +60,6 @@ class NewsPaper {
 
   @override
   String toString() {
-    return 'Source(sourceName: $sourceName, url: $url, fluxUrl: $fluxUrl, donationUrl: $donationUrl)';
+    return 'Source(sourceName: $sourceName, url: $url, imageUrl: $imageUrl, donationUrl: $donationUrl, articles: $articles)';
   }
 }
