@@ -47,6 +47,16 @@ class Article {
 
   String toJson() => json.encode(toMap());
 
+  static List<Article> articleListFromMap(List<dynamic> map) {
+    List<Article> arts = <Article>[];
+
+    for (int i = 0; i < map.length; i++) {
+      arts.add(Article.fromMap(map[i]));
+    }
+
+    return arts;
+  }
+
   static Article fromJson(String source) => fromMap(json.decode(source));
 
   @override

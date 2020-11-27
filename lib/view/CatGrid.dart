@@ -61,7 +61,7 @@ class _NewsGridState extends State<NewsGrid> with AfterLayoutMixin {
 
   @override
   void afterFirstLayout(BuildContext context) {
-    provider.getLastArticles();
+    provider.getLastArticlesSorted();
     Color randomColor = Color.fromRGBO(Random().nextInt(255),
         Random().nextInt(255), Random().nextInt(255), 1);
     
@@ -73,11 +73,9 @@ class _NewsGridState extends State<NewsGrid> with AfterLayoutMixin {
       },
           (r) {
         for (int i = 0; i < r.length; i++) {
-          for (int j = 0; j < r[i].articles.length; j++) {
-            articles.add(CatPhotoErrorTile(randomColor, r[i].articles[j].title));
-            int count = Random().nextInt(4);
-            articleTiles.add(StaggeredTile.count(count, count));
-          }
+          articles.add(CatPhotoErrorTile(randomColor, r[i].title));
+          int count = Random().nextInt(4);
+          articleTiles.add(StaggeredTile.count(count, count));
         }
           // articles.add(CatPhotoTile(r)),
               });

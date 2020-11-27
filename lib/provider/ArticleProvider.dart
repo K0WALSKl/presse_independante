@@ -12,18 +12,24 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class ArticleProvider extends ChangeNotifier {
   final _helper = ArticleHelper();
-  final _streamController = StreamController<Either<Glitch, List<NewsPaper>>>();
-  Stream<Either<Glitch, List<NewsPaper>>> get articleStream {
+  final _streamController = StreamController<Either<Glitch, List<Article>>>();
+  Stream<Either<Glitch, List<Article>>> get articleStream {
     return _streamController.stream;
   }
 
-  Future<void> getLastArticles() async {
-    final articleHelperResult = await _helper.getLastArticles();
+  // Future<void> getLastArticles() async {
+  //   final articleHelperResult = await _helper.getLastArticles();
+  //   print(articleHelperResult);
+  //   _streamController.add(articleHelperResult);
+  // }
+
+  Future<void> getLastArticlesSorted() async {
+    final articleHelperResult = await _helper.getLastArticlesSortedByDate();
     print(articleHelperResult);
     _streamController.add(articleHelperResult);
   }
 
   void refreshGird() {
-    getLastArticles();
+    getLastArticlesSorted();
   }
 }
