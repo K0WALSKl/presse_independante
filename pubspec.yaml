@@ -1,35 +1,26 @@
 name: presse_independante
 description: Compilation de plusieurs journaux indépendants
 
-# The following line prevents the package from being accidentally published to
-# pub.dev using `pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-# The following defines the version and build number for your application.
-# A version number is three numbers separated by dots, like 1.2.43
-# followed by an optional build number separated by a +.
-# Both the version and the builder number may be overridden in flutter
-# build by specifying --build-name and --build-number, respectively.
-# In Android, build-name is used as versionName while build-number used as versionCode.
-# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
-# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
-# Read more about iOS versioning at
-# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: '>=2.10.0 <3.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
   http: ^0.12.0+4
-  flutter_staggered_grid_view: ^0.3.0
   provider: ^4.0.4
-  dartz: ^0.8.9
-  get_it: ^4.0.1
-  after_layout: ^1.0.7+2
-  google_fonts: ^0.3.10
+  build_runner: ^1.10.11
+  json_annotation: ^3.1.1
+  json_serializable: ^3.5.1
+  stacked:
+  stacked_services:
+  get_it:
+  injectable:
+  auto_route:
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -39,6 +30,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  build_runner:
+  auto_route_generator:
+  injectable_generator:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

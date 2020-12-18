@@ -1,9 +1,21 @@
-import 'package:presse_independante/getIt.dart';
-import 'package:flutter/material.dart';
-import 'package:presse_independante/view/HomeScreen.dart';
+import 'package:flutter/material.dart' hide Router;
+import 'package:presse_independante/ui/views/articles/articles_view.dart';
+
+import 'app/locator.dart';
+import 'app/router.gr.dart';
+
 void main() async {
-  setup();
-  runApp(HomeScreen());
+  setupLocator();
+  runApp(Home());
 }
 
-
+class Home extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Wesh',
+      home: ArticlesView(),
+      onGenerateRoute: Router(),
+    );
+  }
+}
