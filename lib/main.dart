@@ -14,7 +14,7 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Wesh',
-      home: ArticlesView(),
+      initialRoute: '/',
       onGenerateRoute: Router(),
     );
   }

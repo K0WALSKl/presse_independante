@@ -21,6 +21,8 @@ dependencies:
   get_it:
   injectable:
   auto_route:
+  webview_flutter:
+  scrollable_positioned_list:
 
 
   # The following adds the Cupertino Icons font to your application.
