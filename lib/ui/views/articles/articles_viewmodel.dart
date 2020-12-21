@@ -15,6 +15,8 @@ class ArticlesViewModel extends FutureViewModel<List<Article>> {
     Duration difference = DateTime.now().difference(date);
     if (difference.inHours > 23)
       return difference.inDays.toString() + (difference.inDays > 1 ? ' jours' : ' jour');
+    if (difference.inMinutes < 60)
+      return difference.inMinutes.toString() + (difference.inMinutes > 1 ? ' minutes' : ' minute');
     return difference.inHours.toString() + (difference.inHours > 1 ? ' heures' : ' heure');
   }
 }
