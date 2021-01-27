@@ -6,7 +6,8 @@ import 'package:presse_independante/datamodels/Article.dart';
 
 @lazySingleton
 class Api {
-  static const kEdnPoint = 'http://10.42.0.1:3000';
+  // static const kEdnPoint = 'http://10.42.0.1:3000';  // DEV
+  static const kEdnPoint = 'http://51.68.70.188:3000'; // PROD
 
   static const kGetLastArticles = 'getNews/sortedByDate';
 
@@ -14,6 +15,7 @@ class Api {
 
   Future<List<Article>> getLastArticles() async {
     List<Article> articles = List<Article>();
+
     final Response response = await client.get('$kEdnPoint/$kGetLastArticles');
     final Map<String, dynamic> body_json = json.decode(response.body);
 

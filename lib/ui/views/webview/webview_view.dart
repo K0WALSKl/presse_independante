@@ -17,33 +17,35 @@ class WebViewUi extends State<WebViewLoader> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]); // TODO l'Appbar fait beuguer la notif bar
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 5,
-        backgroundColor: Colors.grey[700],
-        centerTitle: true,
-        actions: <Widget>[
-          PopupMenuButton(
-            onSelected: choiceAction,
-              itemBuilder: (BuildContext context){
-                return Constants.choices.map((String choice) {
-                  return PopupMenuItem<String>(
-                    value: choice,
-                    child: Text(choice),
-                  );
-                }).toList();
-              }
-          ),
-        ],
-      ),
-      body: WebView(
-        initialUrl: widget.url,
-        javascriptMode: JavascriptMode.unrestricted,
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          elevation: 5,
+          backgroundColor: Colors.grey[700],
+          brightness: Brightness.light,
+          centerTitle: true,
+          actions: <Widget>[
+            PopupMenuButton(
+              onSelected: choiceAction,
+                itemBuilder: (BuildContext context){
+                  return Constants.choices.map((String choice) {
+                    return PopupMenuItem<String>(
+                      value: choice,
+                      child: Text(choice),
+                    );
+                  }).toList();
+                }
+            ),
+          ],
+        ),
+        body: WebView(
+          initialUrl: widget.url,
+          javascriptMode: JavascriptMode.unrestricted,
+        ),
       ),
     );
   }

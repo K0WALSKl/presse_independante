@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter/rendering.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:presse_independante/app/locator.dart';
 import 'package:presse_independante/app/router.gr.dart';
+import 'package:presse_independante/datamodels/Article.dart';
 import 'package:stacked/stacked.dart';
 
 import 'articles_viewmodel.dart';
@@ -19,6 +21,7 @@ class ArticlesView extends StatefulWidget {
 class ArticlesViewScreen extends State<ArticlesView> {
   ScrollController _scrollViewController;
   PageController _pageViewController;
+
   bool _showAppbar = true;
   bool isScrollingDown = true;
 
@@ -55,7 +58,8 @@ class ArticlesViewScreen extends State<ArticlesView> {
               ? loadingScreen(height)
               : !model.hasError
                   ? articleScreen(height, model, width)
-                  : errorScreen(model)),
+                  : errorScreen(model)
+      ),
       viewModelBuilder: () => locator<ArticlesViewModel>(),
     );
   }
@@ -121,7 +125,7 @@ class ArticlesViewScreen extends State<ArticlesView> {
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
                               articlePicture(
-                                  height, model.data[index].imageUrl),
+                                  height, width, model.data[index]),
                               articleTitle(width, model, index),
                               articleSourceNameAndTime(width, model, index),
                               articleDescription(width, model, index),
@@ -217,6 +221,7 @@ class ArticlesViewScreen extends State<ArticlesView> {
       child: AppBar(
         elevation: 60,
         backgroundColor: Colors.white,
+        brightness: Brightness.dark,
         centerTitle: true,
         title: GestureDetector(
           onTap: () => _pageViewController.hasClients
@@ -243,13 +248,14 @@ class ArticlesViewScreen extends State<ArticlesView> {
     );
   }
 
-  ClipRRect articlePicture(double height, String imageUrl) {
+  ClipRRect articlePicture(double height, double width, Article article) {
     return ClipRRect(
         borderRadius: BorderRadius.only(
             topLeft: Radius.circular(5), topRight: Radius.circular(5)),
-        child: Image.network( // Todo Apporter une width constante et centrer les images trop petites
-          imageUrl,
+        child: Image(
+          image: CachedNetworkImageProvider(article.imageUrl) ?? article.articleSource.imageUrl,
           height: height * 0.40,
+          width: width * 0.96,
           alignment: Alignment.topCenter,
           fit: BoxFit.fill,
         ));

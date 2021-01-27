@@ -24,7 +24,7 @@ dependencies:
   webview_flutter:
   scrollable_positioned_list:
   url_launcher:
-  flutter_pulltorefresh:
+  cached_network_image:
 
   cupertino_icons: ^1.0.0
 
