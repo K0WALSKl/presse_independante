@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:presse_independante/app/locator.dart';
 import 'package:presse_independante/app/router.gr.dart';
 import 'package:presse_independante/datamodels/Article.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stacked/stacked.dart';
 
 import 'articles_viewmodel.dart';
@@ -19,6 +20,23 @@ class ArticlesView extends StatefulWidget {
 }
 
 class ArticlesViewScreen extends State<ArticlesView> {
+  // TODO Check prefs...
+  List<String> chosenMediaTitle = <String>[
+    'Les Jours',
+    'Reporterre',
+    'La Releve Et La Peste',
+    'Eco-Bretons',
+    'Fakir',
+  ];
+
+  List<bool> chosenMediaIsChecked = [
+    true,
+    true,
+    true,
+    true,
+    true,
+  ];
+
   ScrollController _scrollViewController;
   PageController _pageViewController;
 
@@ -57,7 +75,7 @@ class ArticlesViewScreen extends State<ArticlesView> {
           body: model.isBusy
               ? loadingScreen(height)
               : !model.hasError
-                  ? articleScreen(height, model, width)
+                  ? articleScreen(height, model, width, context)
                   : errorScreen(model)
       ),
       viewModelBuilder: () => locator<ArticlesViewModel>(),
@@ -87,11 +105,11 @@ class ArticlesViewScreen extends State<ArticlesView> {
     );
   }
 
-  SafeArea articleScreen(double height, ArticlesViewModel model, double width) {
+  SafeArea articleScreen(double height, ArticlesViewModel model, double width, BuildContext context) {
     return SafeArea(
         child: Column(
       children: <Widget>[
-        topBar(height),
+        topBar(height, model),
         Expanded(
           child: PageView.builder(
               scrollDirection: Axis.vertical,
@@ -189,46 +207,176 @@ class ArticlesViewScreen extends State<ArticlesView> {
     );
   }
 
-  Center loadingScreen(double height) {
-    return Center(
-      child: Column(
+  Column loadingScreen(double height) {
+    return Column(
         mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Colors.black),
+          AnimatedContainer(
+            height: _showAppbar ? height * 0.118 : 0.0,
+            duration: Duration(milliseconds: 200),
+            child: AppBar(
+              backgroundColor: Colors.white,
+              brightness: Brightness.dark,
+              centerTitle: true,
+              title: Text(
+                'Presse Indépendante',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontFamily: 'Libre Bodoni',
+                  fontWeight: FontWeight.bold,
+                  fontStyle: FontStyle.italic,
+                  fontSize: height * 0.04,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              actions: <Widget>[
+                //add buttons here
+              ],
+            ),
           ),
-          Padding(
-            padding: EdgeInsets.all(height * 0.05),
-            child: Text(
-              'Chargement des articles',
-              style: TextStyle(
+        Expanded(
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Center(
+                child: CircularProgressIndicator(
+                    backgroundColor: Colors.cyanAccent,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                  ),
+              ),
+              // Padding(
+              //   padding: EdgeInsets.all(height * 0.05),
+              //   child: Text(
+              //     'Chargement des articles',
+              //     style: TextStyle(
+              //       color: Colors.black,
+              //       fontWeight: FontWeight.bold,
+              //     ),
+              //   ),
+              // )
+
+            ],
+          ),
+        ),
+        ],
+    );
+  }
+
+  AnimatedContainer topBar(double height, ArticlesViewModel model) {
+    return AnimatedContainer(
+
+      height: _showAppbar ? height * 0.08 : 0.0,
+      duration: Duration(milliseconds: 200),
+      child: AppBar(
+        actions: <Widget>[
+          InkWell(
+            onTap: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Dialog(
+                      shape: RoundedRectangleBorder(
+                          borderRadius:
+                          BorderRadius.circular(5.0)), //this right here
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  StatefulBuilder(
+                                    builder: (context, _setState) => ListView.builder(
+                                        scrollDirection: Axis.vertical,
+                                        shrinkWrap: true,
+                                        itemCount: chosenMediaTitle.length,
+                                        itemBuilder: (context, index) {
+                                          return CheckboxListTile(
+                                              title: Text(chosenMediaTitle[index]),
+                                              value: chosenMediaIsChecked[index],
+                                              onChanged: (val) {
+                                                _setState(
+                                                    () {
+                                                      chosenMediaIsChecked[index] = val;
+                                                    }
+                                                );
+                                              }
+                                          );
+                                        }
+                                    ),
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      RaisedButton(
+                                          child: Text("Annuler"),
+                                          onPressed: () async {
+                                            Navigator.of(context, rootNavigator: true).pop('dialog');
+                                          }
+                                      ),
+                                      RaisedButton(
+                                        color: Colors.blueAccent,
+                                          child: Text(
+                                              "Sauvegarder",
+                                            style: TextStyle(
+                                              color: Colors.white
+                                            ),
+                                          ),
+                                          onPressed: () async {
+                                            final prefs = await SharedPreferences.getInstance();
+                                            List<String> pickedMedia = List<String>();
+                                            for (int i = 0; i < chosenMediaTitle.length; i++) {
+                                              if (chosenMediaIsChecked[i])
+                                                pickedMedia.add(chosenMediaTitle[i]);
+                                            }
+                                            prefs.setStringList('chosenMedia', pickedMedia);
+                                            Navigator.of(context, rootNavigator: true).pop('dialog');
+                                            model.initialise();
+                                          })
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  });
+            },
+            child: Container(
+              padding: EdgeInsets.only(right: height * 0.02, left: height * 0.02),
+              child: Icon(
+                Icons.filter_list,
                 color: Colors.black,
-                fontWeight: FontWeight.bold,
               ),
             ),
           )
         ],
-      ),
-    );
-  }
-
-  AnimatedContainer topBar(double height) {
-    return AnimatedContainer(
-      height: _showAppbar ? height * 0.08 : 0.0,
-      duration: Duration(milliseconds: 200),
-      child: AppBar(
         elevation: 60,
         backgroundColor: Colors.white,
         brightness: Brightness.dark,
         centerTitle: true,
         title: GestureDetector(
-          onTap: () => _pageViewController.hasClients
-              ? _pageViewController.animateToPage(0,
+          onTap: () async {
+            if (_pageViewController.hasClients) {
+              if (_pageViewController.page == 0) {
+                return model.initialise();
+              }
+              await _pageViewController.animateToPage(0,
                   duration: Duration(milliseconds: 500),
-                  curve: Curves.easeInOut)
-              : null,
+                  curve: Curves.easeInOut);
+            } else {
+              return null;
+            }
+          },
           child: Text(
             'Presse Indépendante',
             style: TextStyle(
@@ -241,9 +389,6 @@ class ArticlesViewScreen extends State<ArticlesView> {
             textAlign: TextAlign.center,
           ),
         ),
-        actions: <Widget>[
-          //add buttons here
-        ],
       ),
     );
   }
@@ -253,7 +398,7 @@ class ArticlesViewScreen extends State<ArticlesView> {
         borderRadius: BorderRadius.only(
             topLeft: Radius.circular(5), topRight: Radius.circular(5)),
         child: Image(
-          image: CachedNetworkImageProvider(article.imageUrl) ?? article.articleSource.imageUrl,
+          image: article.imageUrl == null ? CachedNetworkImageProvider(article.articleSource.imageUrl) : CachedNetworkImageProvider(article.imageUrl),
           height: height * 0.40,
           width: width * 0.96,
           alignment: Alignment.topCenter,
@@ -318,4 +463,79 @@ class ArticlesViewScreen extends State<ArticlesView> {
       ),
     ]);
   }
+
+  Dialog showFilterDialog(BuildContext context) {
+    return Dialog(
+
+      shape: RoundedRectangleBorder(
+          borderRadius:
+          BorderRadius.circular(5.0)), //this right here
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            height: 200,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ListView.builder(
+                    itemCount: chosenMediaTitle.length,
+                    itemBuilder: (context, index) {
+                      return CheckboxListTile(
+                          value: chosenMediaIsChecked[index],
+                          onChanged: null
+                      );
+                    }
+                  )
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }
+//
+// class FilterDialog extends StatelessWidget {
+//   final Map<String, bool> chosenMedia;
+//   BuildContext context
+//
+//   const FilterDialog({
+//     Map<String, bool> chosenMedia, BuildContext context
+//   }): this.chosenMedia = chosenMedia;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Dialog(
+//
+//       shape: RoundedRectangleBorder(
+//           borderRadius:
+//           BorderRadius.circular(5.0)), //this right here
+//       child: Column(
+//         mainAxisSize: MainAxisSize.min,
+//         children: [
+//           Container(
+//             height: 200,
+//             child: Padding(
+//               padding: const EdgeInsets.all(12.0),
+//               child: Column(
+//                 mainAxisAlignment: MainAxisAlignment.center,
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   ListView.builder(
+//                     itemCount: chosenMedia.length,
+//                   )
+//                 ],
+//               ),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }

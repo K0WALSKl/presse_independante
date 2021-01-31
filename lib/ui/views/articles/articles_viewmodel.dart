@@ -11,6 +11,8 @@ class ArticlesViewModel extends FutureViewModel<List<Article>> {
   @override
   Future<List<Article>> futureToRun() => locator<Api>().getLastArticles();
 
+  Future<void> refresh() async => await locator<Api>().getLastArticles();
+
   String getPublicationDateDifferenceFromNow(DateTime date) {
     Duration difference = DateTime.now().difference(date);
     if (difference.inHours > 23)

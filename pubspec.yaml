@@ -25,6 +25,7 @@ dependencies:
   scrollable_positioned_list:
   url_launcher:
   cached_network_image:
+  shared_preferences:
 
   cupertino_icons: ^1.0.0
 
