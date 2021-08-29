@@ -1,4 +1,7 @@
+import 'dart:html' as html;
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter/rendering.dart';
@@ -9,7 +12,6 @@ import 'package:presse_independante/app/router.gr.dart';
 import 'package:presse_independante/datamodels/Article.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stacked/stacked.dart';
-
 import 'articles_viewmodel.dart';
 
 class ArticlesView extends StatefulWidget {
@@ -76,8 +78,7 @@ class ArticlesViewScreen extends State<ArticlesView> {
               ? loadingScreen(height)
               : !model.hasError
                   ? articleScreen(height, model, width, context)
-                  : errorScreen(model)
-      ),
+                  : errorScreen(model)),
       viewModelBuilder: () => locator<ArticlesViewModel>(),
     );
   }
@@ -88,16 +89,19 @@ class ArticlesViewScreen extends State<ArticlesView> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Image.asset("assets/icon/error.png", height: MediaQuery.of(context).size.height * 0.2,),
+          Image.asset(
+            "assets/icon/error.png",
+            height: MediaQuery.of(context).size.height * 0.2,
+          ),
           Padding(
-            padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.05),
+            padding:
+                EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.05),
             child: Text(
               "Impossible de récupérer les articles. Merci de réessayer plus tard.",
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: MediaQuery.of(context).size.height * 0.03,
-                  color: Colors.black
-              ),
+                  fontSize: MediaQuery.of(context).size.height * 0.03,
+                  color: Colors.black),
             ),
           ),
         ],
@@ -105,55 +109,81 @@ class ArticlesViewScreen extends State<ArticlesView> {
     );
   }
 
-  SafeArea articleScreen(double height, ArticlesViewModel model, double width, BuildContext context) {
+  SafeArea articleScreen(double height, ArticlesViewModel model, double width,
+      BuildContext context) {
     return SafeArea(
         child: Column(
       children: <Widget>[
         topBar(height, model),
         Expanded(
-          child: PageView.builder(
-              scrollDirection: Axis.vertical,
-              controller: _pageViewController,
-              key: PageStorageKey('storage-key'),
-              // padding: EdgeInsets.only(top: height * 0.001),
-              // separatorBuilder: (context, index) => SizedBox(
-              //       height: height * 0.001,
-              //     ),
-              itemCount: model.data.length,
-              reverse: false,
-              itemBuilder: (context, index) => GestureDetector(
-                    onTap: () async {
-                      // ExtendedNavigator(router: Router(), name: 'web-view-loader');
-                      Navigator.pushNamed(context, '/web-view-loader',
-                          arguments: WebViewLoaderArguments(
-                              url: model.data[index].url));
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: width * 0.01, vertical: height * 0.02),
-                      height: height * 0.97,
-                      child: Card(
-                          elevation: 5.0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                          child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start, // Elements align left
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              articlePicture(
-                                  height, width, model.data[index]),
-                              articleTitle(width, model, index),
-                              articleSourceNameAndTime(width, model, index),
-                              articleDescription(width, model, index),
-                              Spacer(),
-                              articleAuthor(
-                                  height, context, model, index, width)
-                            ],
-                          )),
-                    ),
-                  )),
+          child: Listener(
+            onPointerSignal: (pointerSignal) async {
+              if (kIsWeb) {
+                if (pointerSignal is PointerScrollEvent) {
+                  print(pointerSignal.scrollDelta.dy);
+                  if (pointerSignal.scrollDelta.dy > 0) {
+                    print('down');
+                    await _pageViewController.nextPage(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeInOut);
+                  } else {
+                    print('up');
+                    await _pageViewController.previousPage(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeInOut);
+                  }
+                  // pointerSignal.print(pointerSignal.offset.toString());
+                  print('Used the weel!');
+                }
+              }
+            },
+            child: PageView.builder(
+                scrollDirection: Axis.vertical,
+                controller: _pageViewController,
+                physics: kIsWeb ? NeverScrollableScrollPhysics() : null,
+                key: PageStorageKey('storage-key'),
+                // padding: EdgeInsets.only(top: height * 0.001),
+                // separatorBuilder: (context, index) => SizedBox(
+                //       height: height * 0.001,
+                //     ),
+                itemCount: model.data.length,
+                reverse: false,
+                itemBuilder: (context, index) => GestureDetector(
+                      onTap: () async {
+                        // ExtendedNavigator(router: Router(), name: 'web-view-loader');
+                        kIsWeb
+                            ? html.window.open(model.data[index].url, 'new tab')
+                            : Navigator.pushNamed(context, '/web-view-loader',
+                                arguments: WebViewLoaderArguments(
+                                    url: model.data[index].url));
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: width * 0.01, vertical: height * 0.02),
+                        height: height * 0.97,
+                        child: Card(
+                            elevation: 5.0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment
+                                  .start, // Elements align left
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                articlePicture(
+                                    height, width, model.data[index]),
+                                articleTitle(width, model, index),
+                                articleSourceNameAndTime(width, model, index),
+                                articleDescription(width, model, index),
+                                Spacer(),
+                                articleAuthor(
+                                    height, context, model, index, width)
+                              ],
+                            )),
+                      ),
+                    )),
+          ),
         ),
       ],
     ));
@@ -191,13 +221,13 @@ class ArticlesViewScreen extends State<ArticlesView> {
               ),
               Flexible(
                 child: Padding(
-                    padding: EdgeInsets.only(left: width * 0.05),
-                    child: Text(
-                        model.data[index].author,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                    ),
+                  padding: EdgeInsets.only(left: width * 0.05),
+                  child: Text(
+                    model.data[index].author,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                  ),
                 ),
               ),
             ],
@@ -209,33 +239,33 @@ class ArticlesViewScreen extends State<ArticlesView> {
 
   Column loadingScreen(double height) {
     return Column(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          AnimatedContainer(
-            height: _showAppbar ? height * 0.118 : 0.0,
-            duration: Duration(milliseconds: 200),
-            child: AppBar(
-              backgroundColor: Colors.white,
-              brightness: Brightness.dark,
-              centerTitle: true,
-              title: Text(
-                'Presse Indépendante',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontFamily: 'Libre Bodoni',
-                  fontWeight: FontWeight.bold,
-                  fontStyle: FontStyle.italic,
-                  fontSize: height * 0.04,
-                ),
-                textAlign: TextAlign.center,
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        AnimatedContainer(
+          height: _showAppbar ? height * 0.118 : 0.0,
+          duration: Duration(milliseconds: 200),
+          child: AppBar(
+            backgroundColor: Colors.white,
+            brightness: Brightness.dark,
+            centerTitle: true,
+            title: Text(
+              'Presse Indépendante',
+              style: TextStyle(
+                color: Colors.black,
+                fontFamily: 'Libre Bodoni',
+                fontWeight: FontWeight.bold,
+                fontStyle: FontStyle.italic,
+                fontSize: height * 0.04,
               ),
-              actions: <Widget>[
-                //add buttons here
-              ],
+              textAlign: TextAlign.center,
             ),
+            actions: <Widget>[
+              //add buttons here
+            ],
           ),
+        ),
         Expanded(
           child: Row(
             mainAxisSize: MainAxisSize.max,
@@ -244,9 +274,9 @@ class ArticlesViewScreen extends State<ArticlesView> {
             children: [
               Center(
                 child: CircularProgressIndicator(
-                    backgroundColor: Colors.cyanAccent,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-                  ),
+                  backgroundColor: Colors.cyanAccent,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                ),
               ),
               // Padding(
               //   padding: EdgeInsets.all(height * 0.05),
@@ -258,17 +288,15 @@ class ArticlesViewScreen extends State<ArticlesView> {
               //     ),
               //   ),
               // )
-
             ],
           ),
         ),
-        ],
+      ],
     );
   }
 
   AnimatedContainer topBar(double height, ArticlesViewModel model) {
     return AnimatedContainer(
-
       height: _showAppbar ? height * 0.08 : 0.0,
       duration: Duration(milliseconds: 200),
       child: AppBar(
@@ -281,7 +309,7 @@ class ArticlesViewScreen extends State<ArticlesView> {
                     return Dialog(
                       shape: RoundedRectangleBorder(
                           borderRadius:
-                          BorderRadius.circular(5.0)), //this right here
+                              BorderRadius.circular(5.0)), //this right here
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -293,51 +321,61 @@ class ArticlesViewScreen extends State<ArticlesView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   StatefulBuilder(
-                                    builder: (context, _setState) => ListView.builder(
-                                        scrollDirection: Axis.vertical,
-                                        shrinkWrap: true,
-                                        itemCount: chosenMediaTitle.length,
-                                        itemBuilder: (context, index) {
-                                          return CheckboxListTile(
-                                              title: Text(chosenMediaTitle[index]),
-                                              value: chosenMediaIsChecked[index],
-                                              onChanged: (val) {
-                                                _setState(
-                                                    () {
-                                                      chosenMediaIsChecked[index] = val;
-                                                    }
-                                                );
-                                              }
-                                          );
-                                        }
-                                    ),
+                                    builder: (context, _setState) =>
+                                        ListView.builder(
+                                            scrollDirection: Axis.vertical,
+                                            shrinkWrap: true,
+                                            itemCount: chosenMediaTitle.length,
+                                            itemBuilder: (context, index) {
+                                              return CheckboxListTile(
+                                                  title: Text(
+                                                      chosenMediaTitle[index]),
+                                                  value: chosenMediaIsChecked[
+                                                      index],
+                                                  onChanged: (val) {
+                                                    _setState(() {
+                                                      chosenMediaIsChecked[
+                                                          index] = val;
+                                                    });
+                                                  });
+                                            }),
                                   ),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
                                       RaisedButton(
                                           child: Text("Annuler"),
                                           onPressed: () async {
-                                            Navigator.of(context, rootNavigator: true).pop('dialog');
-                                          }
-                                      ),
+                                            Navigator.of(context,
+                                                    rootNavigator: true)
+                                                .pop('dialog');
+                                          }),
                                       RaisedButton(
-                                        color: Colors.blueAccent,
+                                          color: Colors.blueAccent,
                                           child: Text(
-                                              "Sauvegarder",
-                                            style: TextStyle(
-                                              color: Colors.white
-                                            ),
+                                            "Sauvegarder",
+                                            style:
+                                                TextStyle(color: Colors.white),
                                           ),
                                           onPressed: () async {
-                                            final prefs = await SharedPreferences.getInstance();
-                                            List<String> pickedMedia = List<String>();
-                                            for (int i = 0; i < chosenMediaTitle.length; i++) {
+                                            final prefs =
+                                                await SharedPreferences
+                                                    .getInstance();
+                                            List<String> pickedMedia =
+                                                List<String>();
+                                            for (int i = 0;
+                                                i < chosenMediaTitle.length;
+                                                i++) {
                                               if (chosenMediaIsChecked[i])
-                                                pickedMedia.add(chosenMediaTitle[i]);
+                                                pickedMedia
+                                                    .add(chosenMediaTitle[i]);
                                             }
-                                            prefs.setStringList('chosenMedia', pickedMedia);
-                                            Navigator.of(context, rootNavigator: true).pop('dialog');
+                                            prefs.setStringList(
+                                                'chosenMedia', pickedMedia);
+                                            Navigator.of(context,
+                                                    rootNavigator: true)
+                                                .pop('dialog');
                                             model.initialise();
                                           })
                                     ],
@@ -352,7 +390,8 @@ class ArticlesViewScreen extends State<ArticlesView> {
                   });
             },
             child: Container(
-              padding: EdgeInsets.only(right: height * 0.02, left: height * 0.02),
+              padding:
+                  EdgeInsets.only(right: height * 0.02, left: height * 0.02),
               child: Icon(
                 Icons.filter_list,
                 color: Colors.black,
@@ -394,11 +433,17 @@ class ArticlesViewScreen extends State<ArticlesView> {
   }
 
   ClipRRect articlePicture(double height, double width, Article article) {
+    final String kImageUrl = kIsWeb
+        ? article.imageUrl.replaceAll(
+            "https://reporterre.net", "http://37.187.37.22/reporterre")
+        : article.imageUrl;
     return ClipRRect(
         borderRadius: BorderRadius.only(
             topLeft: Radius.circular(5), topRight: Radius.circular(5)),
         child: Image(
-          image: article.imageUrl == null ? CachedNetworkImageProvider(article.articleSource.imageUrl) : CachedNetworkImageProvider(article.imageUrl),
+          image: article.imageUrl == null
+              ? CachedNetworkImageProvider(article.articleSource.imageUrl)
+              : CachedNetworkImageProvider(kImageUrl),
           height: height * 0.40,
           width: width * 0.96,
           alignment: Alignment.topCenter,
@@ -466,10 +511,8 @@ class ArticlesViewScreen extends State<ArticlesView> {
 
   Dialog showFilterDialog(BuildContext context) {
     return Dialog(
-
       shape: RoundedRectangleBorder(
-          borderRadius:
-          BorderRadius.circular(5.0)), //this right here
+          borderRadius: BorderRadius.circular(5.0)), //this right here
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -482,14 +525,12 @@ class ArticlesViewScreen extends State<ArticlesView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ListView.builder(
-                    itemCount: chosenMediaTitle.length,
-                    itemBuilder: (context, index) {
-                      return CheckboxListTile(
-                          value: chosenMediaIsChecked[index],
-                          onChanged: null
-                      );
-                    }
-                  )
+                      itemCount: chosenMediaTitle.length,
+                      itemBuilder: (context, index) {
+                        return CheckboxListTile(
+                            value: chosenMediaIsChecked[index],
+                            onChanged: null);
+                      })
                 ],
               ),
             ),
@@ -498,7 +539,6 @@ class ArticlesViewScreen extends State<ArticlesView> {
       ),
     );
   }
-
 }
 //
 // class FilterDialog extends StatelessWidget {
