@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'package:presse_independante/app/locator.dart';
 import 'package:presse_independante/app/router.gr.dart';
 import 'package:presse_independante/datamodels/Article.dart';
+import 'package:presse_independante/ui/views/articles/web_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stacked/stacked.dart';
 import 'articles_viewmodel.dart';
@@ -29,9 +30,11 @@ class ArticlesViewScreen extends State<ArticlesView> {
     'La Releve Et La Peste',
     'Eco-Bretons',
     'Fakir',
+    'Alter1fo'
   ];
 
   List<bool> chosenMediaIsChecked = [
+    true,
     true,
     true,
     true,
@@ -77,7 +80,9 @@ class ArticlesViewScreen extends State<ArticlesView> {
           body: model.isBusy
               ? loadingScreen(height)
               : !model.hasError
-                  ? articleScreen(height, model, width, context)
+                  ? (kIsWeb
+                      ? articleWebScreen(height, model, width, context)
+                      : articleScreen(height, model, width, context))
                   : errorScreen(model)),
       viewModelBuilder: () => locator<ArticlesViewModel>(),
     );
@@ -191,6 +196,15 @@ class ArticlesViewScreen extends State<ArticlesView> {
 
   SizedBox articleAuthor(double height, BuildContext context,
       ArticlesViewModel model, int index, double width) {
+    String url;
+
+    if (kIsWeb) {
+      url = getReverseProxyLink(model.data[index].articleSource.imageUrl);
+    } else {
+      url = model.data[index].articleSource.imageUrl;
+    }
+    print(url);
+
     return SizedBox(
       height: height * 0.09,
       child: Container(
@@ -214,7 +228,7 @@ class ArticlesViewScreen extends State<ArticlesView> {
               Padding(
                 padding: EdgeInsets.only(left: width * 0.02),
                 child: Image.network(
-                  model.data[index].articleSource.imageUrl,
+                  url,
                   height: height * 0.05,
                   fit: BoxFit.contain,
                 ),
@@ -235,6 +249,18 @@ class ArticlesViewScreen extends State<ArticlesView> {
         ),
       ),
     );
+  }
+
+  String getReverseProxyLink(String imageUrl) {
+    final Uri uri = Uri.parse(imageUrl);
+    // TODO Remove the print
+    print(uri.host.split('.')[0]);
+    final String url = ('http://37.187.37.22/' +
+        (uri.host.split('.')[0] == 'www'
+            ? uri.host.split('.')[1]
+            : uri.host.split('.')[0]) +
+        uri.path);
+    return url;
   }
 
   Column loadingScreen(double height) {
@@ -433,17 +459,22 @@ class ArticlesViewScreen extends State<ArticlesView> {
   }
 
   ClipRRect articlePicture(double height, double width, Article article) {
-    final String kImageUrl = kIsWeb
-        ? article.imageUrl.replaceAll(
-            "https://reporterre.net", "http://37.187.37.22/reporterre")
-        : article.imageUrl;
+    String url;
+
+    if (kIsWeb) {
+      url = getReverseProxyLink(article.imageUrl);
+    } else {
+      url = article.imageUrl;
+    }
+    print(url);
+
     return ClipRRect(
         borderRadius: BorderRadius.only(
             topLeft: Radius.circular(5), topRight: Radius.circular(5)),
         child: Image(
           image: article.imageUrl == null
               ? CachedNetworkImageProvider(article.articleSource.imageUrl)
-              : CachedNetworkImageProvider(kImageUrl),
+              : CachedNetworkImageProvider(url),
           height: height * 0.40,
           width: width * 0.96,
           alignment: Alignment.topCenter,
