@@ -9,14 +9,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:presse_independante/app/locator.dart';
 import 'package:presse_independante/app/router.gr.dart';
-import 'package:presse_independante/datamodels/Article.dart';
+import 'package:presse_independante/datamodels/article.dart';
 import 'package:presse_independante/ui/views/articles/web_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stacked/stacked.dart';
 import 'articles_viewmodel.dart';
 
 class ArticlesView extends StatefulWidget {
-  // const ArticlesView({Key: key}) : super(key: key);
+  // const ArticlesView({Key? Key: key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => ArticlesViewScreen();
@@ -42,8 +42,8 @@ class ArticlesViewScreen extends State<ArticlesView> {
     true,
   ];
 
-  ScrollController _scrollViewController;
-  PageController _pageViewController;
+  // late ScrollController _scrollViewController;
+  late PageController _pageViewController;
 
   bool _showAppbar = true;
   bool isScrollingDown = true;
@@ -151,16 +151,18 @@ class ArticlesViewScreen extends State<ArticlesView> {
                 // separatorBuilder: (context, index) => SizedBox(
                 //       height: height * 0.001,
                 //     ),
-                itemCount: model.data.length,
+                itemCount: model.data!.length,
                 reverse: false,
                 itemBuilder: (context, index) => GestureDetector(
                       onTap: () async {
                         // ExtendedNavigator(router: Router(), name: 'web-view-loader');
                         kIsWeb
-                            ? html.window.open(model.data[index].url, 'new tab')
+                            ? html.window
+                                .open(model.data![index].url, 'new tab')
                             : Navigator.pushNamed(context, '/web-view-loader',
-                                arguments: WebViewLoaderArguments(
-                                    url: model.data[index].url));
+                                arguments: WebViewLoaderRouteArgs(
+                                    url: model.data![index].url,
+                                    key: const Key('WebView')));
                       },
                       child: Container(
                         padding: EdgeInsets.symmetric(
@@ -177,7 +179,7 @@ class ArticlesViewScreen extends State<ArticlesView> {
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
                                 articlePicture(
-                                    height, width, model.data[index]),
+                                    height, width, model.data![index]),
                                 articleTitle(width, model, index),
                                 articleSourceNameAndTime(width, model, index),
                                 articleDescription(width, model, index),
@@ -199,19 +201,19 @@ class ArticlesViewScreen extends State<ArticlesView> {
     String url;
 
     if (kIsWeb) {
-      url = getReverseProxyLink(model.data[index].articleSource.imageUrl);
+      url = getReverseProxyLink(model.data![index].articleSource.imageUrl);
     } else {
-      url = model.data[index].articleSource.imageUrl;
+      url = model.data![index].articleSource.imageUrl;
     }
     print(url);
 
     return SizedBox(
       height: height * 0.09,
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(
             top: BorderSide(
-              color: Colors.grey[350],
+              color: Color.fromRGBO(214, 214, 214, 1),
             ),
           ),
         ),
@@ -219,8 +221,9 @@ class ArticlesViewScreen extends State<ArticlesView> {
           onTap: () async {
             // ExtendedNavigator(router: Router(), name: 'web-view-loader');
             Navigator.pushNamed(context, '/web-view-loader',
-                arguments: WebViewLoaderArguments(
-                    url: model.data[index].articleSource.websiteUrl));
+                arguments: WebViewLoaderRouteArgs(
+                    url: model.data![index].articleSource.url,
+                    key: const Key('WebViewLoaderTwo')));
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -237,7 +240,7 @@ class ArticlesViewScreen extends State<ArticlesView> {
                 child: Padding(
                   padding: EdgeInsets.only(left: width * 0.05),
                   child: Text(
-                    model.data[index].author,
+                    model.data![index].author,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     softWrap: false,
@@ -274,7 +277,8 @@ class ArticlesViewScreen extends State<ArticlesView> {
           duration: Duration(milliseconds: 200),
           child: AppBar(
             backgroundColor: Colors.white,
-            brightness: Brightness.dark,
+            systemOverlayStyle: const SystemUiOverlayStyle(
+                statusBarBrightness: Brightness.dark),
             centerTitle: true,
             title: Text(
               'Presse Indépendante',
@@ -329,7 +333,7 @@ class ArticlesViewScreen extends State<ArticlesView> {
         actions: <Widget>[
           InkWell(
             onTap: () {
-              showDialog(
+              showDialog<void>(
                   context: context,
                   builder: (BuildContext context) {
                     return Dialog(
@@ -358,10 +362,10 @@ class ArticlesViewScreen extends State<ArticlesView> {
                                                       chosenMediaTitle[index]),
                                                   value: chosenMediaIsChecked[
                                                       index],
-                                                  onChanged: (val) {
+                                                  onChanged: (bool? val) {
                                                     _setState(() {
                                                       chosenMediaIsChecked[
-                                                          index] = val;
+                                                          index] = val!;
                                                     });
                                                   });
                                             }),
@@ -389,7 +393,7 @@ class ArticlesViewScreen extends State<ArticlesView> {
                                                 await SharedPreferences
                                                     .getInstance();
                                             List<String> pickedMedia =
-                                                List<String>();
+                                                <String>[];
                                             for (int i = 0;
                                                 i < chosenMediaTitle.length;
                                                 i++) {
@@ -486,7 +490,7 @@ class ArticlesViewScreen extends State<ArticlesView> {
     return Padding(
       padding: EdgeInsets.all(width * 0.02),
       child: Text(
-        model.data[index].title,
+        model.data![index].title,
         textAlign: TextAlign.left,
         overflow: TextOverflow.ellipsis,
         maxLines: 3,
@@ -502,7 +506,7 @@ class ArticlesViewScreen extends State<ArticlesView> {
     return Padding(
       padding: EdgeInsets.all(width * 0.02),
       child: Text(
-        model.data[index].description,
+        model.data![index].description,
         textAlign: TextAlign.left,
         overflow: TextOverflow.ellipsis,
         maxLines: 4,
@@ -520,7 +524,7 @@ class ArticlesViewScreen extends State<ArticlesView> {
         child: Padding(
           padding: EdgeInsets.all(width * 0.02),
           child: Text(
-            model.data[index].articleSource.name,
+            model.data![index].articleSource.name,
             textAlign: TextAlign.left,
             overflow: TextOverflow.ellipsis,
             maxLines: 3,
@@ -531,7 +535,7 @@ class ArticlesViewScreen extends State<ArticlesView> {
       Text(
         'il y a ' +
             model.getPublicationDateDifferenceFromNow(
-                model.data[index].publicationDate),
+                model.data![index].publicationDate),
         textAlign: TextAlign.left,
         overflow: TextOverflow.ellipsis,
         maxLines: 3,

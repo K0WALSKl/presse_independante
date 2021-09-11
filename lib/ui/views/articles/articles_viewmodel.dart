@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
 import 'package:presse_independante/app/locator.dart';
-import 'package:presse_independante/datamodels/Article.dart';
+import 'package:presse_independante/datamodels/article.dart';
 import 'package:presse_independante/services/api.dart';
 import 'package:stacked/stacked.dart';
 
@@ -16,9 +16,12 @@ class ArticlesViewModel extends FutureViewModel<List<Article>> {
   String getPublicationDateDifferenceFromNow(DateTime date) {
     Duration difference = DateTime.now().difference(date);
     if (difference.inHours > 23)
-      return difference.inDays.toString() + (difference.inDays > 1 ? ' jours' : ' jour');
+      return difference.inDays.toString() +
+          (difference.inDays > 1 ? ' jours' : ' jour');
     if (difference.inMinutes < 60)
-      return difference.inMinutes.toString() + (difference.inMinutes > 1 ? ' minutes' : ' minute');
-    return difference.inHours.toString() + (difference.inHours > 1 ? ' heures' : ' heure');
+      return difference.inMinutes.toString() +
+          (difference.inMinutes > 1 ? ' minutes' : ' minute');
+    return difference.inHours.toString() +
+        (difference.inHours > 1 ? ' heures' : ' heure');
   }
 }

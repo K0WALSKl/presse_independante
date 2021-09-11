@@ -4,16 +4,15 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebViewLoader extends StatefulWidget {
-  final String url;
+  const WebViewLoader({required Key? key, required this.url}) : super(key: key);
 
-  const WebViewLoader({Key key, this.url}) : super(key: key);
+  final String? url;
 
   @override
   State<StatefulWidget> createState() => WebViewUi();
 }
 
 class WebViewUi extends State<WebViewLoader> {
-
   @override
   void initState() {
     super.initState();
@@ -29,17 +28,16 @@ class WebViewUi extends State<WebViewLoader> {
           brightness: Brightness.light,
           centerTitle: true,
           actions: <Widget>[
-            PopupMenuButton(
-              onSelected: choiceAction,
-                itemBuilder: (BuildContext context){
+            PopupMenuButton<String>(
+                onSelected: choiceAction,
+                itemBuilder: (BuildContext context) {
                   return Constants.choices.map((String choice) {
                     return PopupMenuItem<String>(
                       value: choice,
                       child: Text(choice),
                     );
                   }).toList();
-                }
-            ),
+                }),
           ],
         ),
         body: WebView(
@@ -50,19 +48,18 @@ class WebViewUi extends State<WebViewLoader> {
     );
   }
 
-  void choiceAction(String value) async {
-    if (value == Constants.openInBrowser)
-      if (await canLaunch(widget.url))
-        await launch(widget.url);
-      else
+  Future<void> choiceAction(String value) async {
+    if (value == Constants.openInBrowser) {
+      if (await canLaunch(widget.url!)) {
+        await launch(widget.url!);
+      } else {
         throw 'Impossible de lancer ce lien dans votre navigateur';
+      }
+    }
   }
 }
 
 class Constants {
-  static const String openInBrowser  = 'Ouvrir dans le navigateur';
-
-  static const List<String> choices = <String>[
-    openInBrowser
-  ];
+  static const String openInBrowser = 'Ouvrir dans le navigateur';
+  static const List<String> choices = <String>[openInBrowser];
 }

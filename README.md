@@ -1,17 +1,9 @@
-# presse_independante
+# Presse Independant's Client
 
-Compilation de plusieurs journaux indépendants
+This client make requests to [an API](https://github.com/K0WALSKl/PresseIndependanteAPI) and displays the article 
+from various independant sources.
 
-## Getting Started
+## Compatibility
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# presse_independante
+The client can be used on the web or in Android. It should works on IOS but I've never tried it since I don't have the
+equipment to test it.

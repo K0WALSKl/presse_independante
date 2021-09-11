@@ -1,67 +1,64 @@
 import 'dart:convert';
-import 'dart:io' show Platform;
-
 import 'package:flutter/foundation.dart';
 import 'package:http/browser_client.dart';
 import 'package:http/http.dart';
 import 'package:injectable/injectable.dart';
-import 'package:presse_independante/datamodels/Article.dart';
+import 'package:presse_independante/datamodels/article.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 @lazySingleton
 class Api {
-  static const kEdnPoint = '127.0.0.1'; // Local
+  static const String kEdnPoint = '127.0.0.1'; // Local
   // static const kEdnPoint = 'http://www.gwendhalclaudel.com'; // PROD
-  static const kGetLastArticles = 'getNews/sortedByDate';
+  static const String kGetLastArticles = 'getNews/sortedByDate';
 
-  static Uri uri = new Uri(
-      scheme: "http", host: kEdnPoint, port: 3000, path: kGetLastArticles);
+  static Uri uri =
+      Uri(scheme: 'http', host: kEdnPoint, port: 3000, path: kGetLastArticles);
 
   Future<List<Article>> getLastArticles() async {
-    final prefs = await SharedPreferences.getInstance();
-    List<String> chosenMedia = prefs.getStringList('chosenMedia') ??
-        [
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final List<String> chosenMedia = prefs.getStringList('chosenMedia') ??
+        <String>[
           'Les Jours',
           'Reporterre',
           'La Releve Et La Peste',
           'Eco-Bretons',
           'Fakir',
+          'Alter1fo',
         ];
 
-    List<Article> articles = List<Article>();
-    Map<String, dynamic> body_json;
+    final List<Article> articles = <Article>[];
+    List<dynamic> bodyJson;
 
-    print("Getting the articles");
+    print('Getting the articles');
 
     print(kIsWeb.toString());
     if (kIsWeb) {
-      print('in browser');
+      final Map<String, String> headers = <String, String>{
+        'Accept': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      };
       final BrowserClient client = BrowserClient();
-      final Response response = await client.get(uri, headers: {
-        "Accept": "application/json",
-        "Access-Control-Allow-Origin": "*"
-      });
-      print(response);
-      body_json = json.decode(response.body);
-    } else if (Platform.isIOS || Platform.isAndroid) {
-      Client client = Client();
+      final Response response = await client.get(uri, headers: headers);
+      bodyJson = jsonDecode(response.body)['data'] as List<dynamic>;
+    } else {
+      final Client client = Client();
       final Response response = await client.get(uri);
-      body_json = json.decode(response.body);
+      bodyJson = jsonDecode(response.body) as List<dynamic>;
     }
 
-    print(body_json);
+    final List<Map<String, dynamic>> articlesJson =
+        bodyJson.cast<Map<String, dynamic>>();
 
-    List<dynamic> articles_json = body_json['data'];
+    // final List<dynamic> articlesJson = bodyJson['data'] as List<dynamic>;
     Article current;
 
-    articles_json.forEach((element) {
-      current = Article.fromJson(element);
-      for (String media in chosenMedia)
+    for (final Map<String, dynamic> article in articlesJson) {
+      current = Article.fromJson(article);
+      for (final String media in chosenMedia)
         if (current.articleSource.name.contains(media))
-          articles.add(Article.fromJson(element));
-      // print(chosenMedia);
-      // articles.add(Article.fromJson(element));
-    });
+          articles.add(Article.fromJson(article));
+    }
     return articles;
   }
 }

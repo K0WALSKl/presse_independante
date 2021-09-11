@@ -4,61 +4,58 @@
 // AutoRouteGenerator
 // **************************************************************************
 
-// ignore_for_file: public_member_api_docs
+import 'package:auto_route/auto_route.dart' as _i1;
+import 'package:flutter/foundation.dart' as _i5;
+import 'package:flutter/material.dart' as _i2;
 
-import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
+import '../ui/views/articles/articles_view.dart' as _i3;
+import '../ui/views/webview/webview_view.dart' as _i4;
 
-import '../ui/views/articles/articles_view.dart';
-import '../ui/views/webview/webview_view.dart';
+class Router extends _i1.RootStackRouter {
+  Router([_i2.GlobalKey<_i2.NavigatorState>? navigatorKey])
+      : super(navigatorKey);
 
-class Routes {
-  static const String articlesView = '/';
-  static const String webViewLoader = '/web-view-loader';
-  static const all = <String>{
-    articlesView,
-    webViewLoader,
+  @override
+  final Map<String, _i1.PageFactory> pagesMap = {
+    ArticlesViewRoute.name: (routeData) => _i1.MaterialPageX<void>(
+        routeData: routeData,
+        builder: (_) {
+          return _i3.ArticlesView();
+        }),
+    WebViewLoaderRoute.name: (routeData) => _i1.MaterialPageX<void>(
+        routeData: routeData,
+        builder: (data) {
+          final args = data.argsAs<WebViewLoaderRouteArgs>();
+          return _i4.WebViewLoader(key: args.key, url: args.url);
+        })
   };
+
+  @override
+  List<_i1.RouteConfig> get routes => [
+        _i1.RouteConfig(ArticlesViewRoute.name, path: '/'),
+        _i1.RouteConfig(WebViewLoaderRoute.name, path: '/web-view-loader')
+      ];
 }
 
-class Router extends RouterBase {
-  @override
-  List<RouteDef> get routes => _routes;
-  final _routes = <RouteDef>[
-    RouteDef(Routes.articlesView, page: ArticlesView),
-    RouteDef(Routes.webViewLoader, page: WebViewLoader),
-  ];
-  @override
-  Map<Type, AutoRouteFactory> get pagesMap => _pagesMap;
-  final _pagesMap = <Type, AutoRouteFactory>{
-    ArticlesView: (data) {
-      return MaterialPageRoute<dynamic>(
-        builder: (context) => ArticlesView(),
-        settings: data,
-      );
-    },
-    WebViewLoader: (data) {
-      final args = data.getArgs<WebViewLoaderArguments>(
-        orElse: () => WebViewLoaderArguments(),
-      );
-      return MaterialPageRoute<dynamic>(
-        builder: (context) => WebViewLoader(
-          key: args.key,
-          url: args.url,
-        ),
-        settings: data,
-      );
-    },
-  };
+class ArticlesViewRoute extends _i1.PageRouteInfo<void> {
+  const ArticlesViewRoute() : super(name, path: '/');
+
+  static const String name = 'ArticlesViewRoute';
 }
 
-/// ************************************************************************
-/// Arguments holder classes
-/// *************************************************************************
+class WebViewLoaderRoute extends _i1.PageRouteInfo<WebViewLoaderRouteArgs> {
+  WebViewLoaderRoute({required _i5.Key? key, required String? url})
+      : super(name,
+            path: '/web-view-loader',
+            args: WebViewLoaderRouteArgs(key: key, url: url));
 
-/// WebViewLoader arguments holder class
-class WebViewLoaderArguments {
-  final Key key;
-  final String url;
-  WebViewLoaderArguments({this.key, this.url});
+  static const String name = 'WebViewLoaderRoute';
+}
+
+class WebViewLoaderRouteArgs {
+  const WebViewLoaderRouteArgs({required this.key, required this.url});
+
+  final _i5.Key? key;
+
+  final String? url;
 }

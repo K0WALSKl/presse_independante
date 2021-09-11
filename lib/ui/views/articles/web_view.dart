@@ -2,10 +2,9 @@ import 'dart:html' as html;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:presse_independante/app/router.gr.dart';
-import 'package:presse_independante/datamodels/Article.dart';
+import 'package:presse_independante/datamodels/article.dart';
 
 import 'articles_viewmodel.dart';
 
@@ -26,16 +25,17 @@ SafeArea articleWebScreen(double height, ArticlesViewModel model, double width,
               mainAxisSpacing: 20),
           scrollDirection: Axis.vertical,
           key: PageStorageKey('storage-key'),
-          itemCount: model.data.length,
+          itemCount: model.data!.length,
           reverse: false,
           itemBuilder: (context, index) => GestureDetector(
             onTap: () async {
               // ExtendedNavigator(router: Router(), name: 'web-view-loader');
               kIsWeb
-                  ? html.window.open(model.data[index].url, 'new tab')
+                  ? html.window.open(model.data![index].url, 'new tab')
                   : Navigator.pushNamed(context, '/web-view-loader',
-                      arguments:
-                          WebViewLoaderArguments(url: model.data[index].url));
+                      arguments: WebViewLoaderRouteArgs(
+                          url: model.data![index].url,
+                          key: const Key('WebViewOpenNewTab')));
             },
             child: Container(
               padding: EdgeInsets.symmetric(
@@ -52,7 +52,7 @@ SafeArea articleWebScreen(double height, ArticlesViewModel model, double width,
                         CrossAxisAlignment.start, // Elements align left
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      articlePicture(height, width, model.data[index]),
+                      articlePicture(height, width, model.data![index]),
                       articleTitle(width, model, index),
                       articleSourceNameAndTime(width, model, index),
                       articleDescription(width, model, index),
@@ -75,7 +75,7 @@ AnimatedContainer topBar(double height, ArticlesViewModel model) {
     child: AppBar(
       actions: <Widget>[
         Container(
-          padding: EdgeInsets.only(right: height * 0.02, left: height * 0.02),
+          // padding: EdgeInsets.only(right: height * 0.02, left: height * 0.02),
           child: Icon(
             Icons.filter_list,
             color: Colors.black,
@@ -139,7 +139,7 @@ Padding articleTitle(double width, ArticlesViewModel model, int index) {
     padding:
         EdgeInsets.fromLTRB(width * 0.0085, width * 0.0085, 0, width * 0.0045),
     child: Text(
-      model.data[index].title,
+      model.data![index].title,
       textAlign: TextAlign.left,
       overflow: TextOverflow.ellipsis,
       maxLines: 3,
@@ -157,7 +157,7 @@ Row articleSourceNameAndTime(double width, ArticlesViewModel model, int index) {
       child: Padding(
         padding: EdgeInsets.only(left: width * 0.0085),
         child: Text(
-          model.data[index].articleSource.name,
+          model.data![index].articleSource.name,
           textAlign: TextAlign.left,
           overflow: TextOverflow.ellipsis,
           maxLines: 4,
@@ -168,7 +168,7 @@ Row articleSourceNameAndTime(double width, ArticlesViewModel model, int index) {
     Text(
       ' il y a ' +
           model.getPublicationDateDifferenceFromNow(
-              model.data[index].publicationDate),
+              model.data![index].publicationDate),
       textAlign: TextAlign.left,
       overflow: TextOverflow.ellipsis,
       maxLines: 1,
@@ -181,7 +181,7 @@ Padding articleDescription(double width, ArticlesViewModel model, int index) {
   return Padding(
     padding: EdgeInsets.all(width * 0.0085),
     child: Text(
-      model.data[index].description,
+      model.data![index].description,
       textAlign: TextAlign.left,
       overflow: TextOverflow.ellipsis,
       maxLines: 8,
@@ -197,19 +197,19 @@ SizedBox articleAuthor(double height, BuildContext context,
   String url;
 
   if (kIsWeb) {
-    url = getReverseProxyLink(model.data[index].articleSource.imageUrl);
+    url = getReverseProxyLink(model.data![index].articleSource.imageUrl);
   } else {
-    url = model.data[index].articleSource.imageUrl;
+    url = model.data![index].articleSource.imageUrl;
   }
   print(url);
 
   return SizedBox(
     height: height * 0.09,
     child: Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: Colors.grey[350],
+            color: Color.fromRGBO(214, 214, 214, 1),
           ),
         ),
       ),
@@ -217,8 +217,9 @@ SizedBox articleAuthor(double height, BuildContext context,
         onTap: () async {
           // ExtendedNavigator(router: Router(), name: 'web-view-loader');
           Navigator.pushNamed(context, '/web-view-loader',
-              arguments: WebViewLoaderArguments(
-                  url: model.data[index].articleSource.websiteUrl));
+              arguments: WebViewLoaderRouteArgs(
+                  url: model.data![index].articleSource.url,
+                  key: const Key('WebViewLoaderThree')));
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -235,7 +236,7 @@ SizedBox articleAuthor(double height, BuildContext context,
               child: Padding(
                 padding: EdgeInsets.only(left: width * 0.0085),
                 child: Text(
-                  model.data[index].author,
+                  model.data![index].author,
                   maxLines: 1,
                   textAlign: TextAlign.left,
                   overflow: TextOverflow.ellipsis,

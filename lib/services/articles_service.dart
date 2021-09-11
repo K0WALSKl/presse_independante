@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
 import 'package:presse_independante/app/locator.dart';
-import 'package:presse_independante/datamodels/Article.dart';
+import 'package:presse_independante/datamodels/article.dart';
 
 import 'api.dart';
 
@@ -8,7 +8,7 @@ import 'api.dart';
 class ArticlesService {
   final _api = locator<Api>();
 
-  List<Article> _articles; // = List<Article>();*
+  late List<Article> _articles; // = List<Article>();*
   List<Article> get articles => _articles;
 
   bool get hasArticles => _articles != null && _articles.isNotEmpty;

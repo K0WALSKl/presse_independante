@@ -11,17 +11,16 @@ void main() async {
 }
 
 class Home extends StatelessWidget {
+  final _appRouter = Router();
+
   @override
   Widget build(BuildContext context) {
-    // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    //   statusBarColor: Colors.white,
-    //   statusBarBrightness: Brightness.dark,
-    //   statusBarIconBrightness: Brightness.dark,
-    // ));
     return MaterialApp(
-      title: 'Presse Indépendante',
-      initialRoute: '/',
-      onGenerateRoute: Router(),
-    );
+        title: 'Presse Indépendante',
+        initialRoute: '/',
+        key: const Key('RootMaterialApp'),
+        home: MaterialApp.router(
+            routeInformationParser: _appRouter.defaultRouteParser(),
+            routerDelegate: _appRouter.delegate()));
   }
 }

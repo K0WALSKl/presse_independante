@@ -6,28 +6,30 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.10.0 <3.0.0'
+  sdk: '>=2.12.0 <3.0.0'
+
+dependency_overrides:
+  meta: ^1.4.0
 
 dependencies:
   flutter:
     sdk: flutter
   http: ^0.13.3
-  provider: ^4.0.4
-  build_runner: ^1.10.11
-  json_annotation: ^3.1.1
-  json_serializable: ^3.5.1
-  stacked:
+  provider: ^5.0.0
+  json_annotation: ^4.1.0
+  json_serializable: ^5.0.0
+  stacked: ^2.2.5
   stacked_services:
   get_it:
   injectable:
-  auto_route:
+  auto_route: ^2.3.2
   webview_flutter:
   scrollable_positioned_list:
   url_launcher:
-  cached_network_image:
-  shared_preferences:
-
+  cached_network_image: ^3.1.0
+  shared_preferences: ^2.0.7
   cupertino_icons: ^1.0.0
+  plugin_platform_interface: ^2.0.0
 
 dev_dependencies:
   flutter_test:
