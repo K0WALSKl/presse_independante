@@ -1,7 +1,7 @@
 import 'package:injectable/injectable.dart';
 import 'package:presse_independante/app/locator.dart';
 import 'package:presse_independante/datamodels/article.dart';
-import 'package:presse_independante/services/api.dart';
+import 'package:presse_independante/services/api_manager.dart';
 import 'package:stacked/stacked.dart';
 
 @singleton
@@ -9,9 +9,10 @@ class ArticlesViewModel extends FutureViewModel<List<Article>> {
   ArticlesViewModel();
 
   @override
-  Future<List<Article>> futureToRun() => locator<Api>().getLastArticles();
+  Future<List<Article>> futureToRun() =>
+      locator<ApiManager>().getLastArticles();
 
-  Future<void> refresh() async => await locator<Api>().getLastArticles();
+  Future<void> refresh() async => locator<ApiManager>().getLastArticles();
 
   String getPublicationDateDifferenceFromNow(DateTime date) {
     Duration difference = DateTime.now().difference(date);

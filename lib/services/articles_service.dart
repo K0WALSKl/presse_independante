@@ -2,11 +2,12 @@ import 'package:injectable/injectable.dart';
 import 'package:presse_independante/app/locator.dart';
 import 'package:presse_independante/datamodels/article.dart';
 
-import 'api.dart';
+// import 'api.dart';
+import 'api_manager.dart';
 
 @lazySingleton
 class ArticlesService {
-  final _api = locator<Api>();
+  final ApiManager _api = locator<ApiManager>();
 
   late List<Article> _articles; // = List<Article>();*
   List<Article> get articles => _articles;

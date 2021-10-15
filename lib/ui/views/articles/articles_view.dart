@@ -1,8 +1,5 @@
-import 'dart:html' as html;
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +10,7 @@ import 'package:presse_independante/datamodels/article.dart';
 import 'package:presse_independante/ui/views/articles/web_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stacked/stacked.dart';
+
 import 'articles_viewmodel.dart';
 
 class ArticlesView extends StatefulWidget {
@@ -121,76 +119,49 @@ class ArticlesViewScreen extends State<ArticlesView> {
       children: <Widget>[
         topBar(height, model),
         Expanded(
-          child: Listener(
-            onPointerSignal: (pointerSignal) async {
-              if (kIsWeb) {
-                if (pointerSignal is PointerScrollEvent) {
-                  print(pointerSignal.scrollDelta.dy);
-                  if (pointerSignal.scrollDelta.dy > 0) {
-                    print('down');
-                    await _pageViewController.nextPage(
-                        duration: Duration(milliseconds: 300),
-                        curve: Curves.easeInOut);
-                  } else {
-                    print('up');
-                    await _pageViewController.previousPage(
-                        duration: Duration(milliseconds: 300),
-                        curve: Curves.easeInOut);
-                  }
-                  // pointerSignal.print(pointerSignal.offset.toString());
-                  print('Used the weel!');
-                }
-              }
-            },
-            child: PageView.builder(
-                scrollDirection: Axis.vertical,
-                controller: _pageViewController,
-                physics: kIsWeb ? NeverScrollableScrollPhysics() : null,
-                key: PageStorageKey('storage-key'),
-                // padding: EdgeInsets.only(top: height * 0.001),
-                // separatorBuilder: (context, index) => SizedBox(
-                //       height: height * 0.001,
-                //     ),
-                itemCount: model.data!.length,
-                reverse: false,
-                itemBuilder: (context, index) => GestureDetector(
-                      onTap: () async {
-                        // ExtendedNavigator(router: Router(), name: 'web-view-loader');
-                        kIsWeb
-                            ? html.window
-                                .open(model.data![index].url, 'new tab')
-                            : Navigator.pushNamed(context, '/web-view-loader',
-                                arguments: WebViewLoaderRouteArgs(
-                                    url: model.data![index].url,
-                                    key: const Key('WebView')));
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: width * 0.01, vertical: height * 0.02),
-                        height: height * 0.97,
-                        child: Card(
-                            elevation: 5.0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment
-                                  .start, // Elements align left
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                articlePicture(
-                                    height, width, model.data![index]),
-                                articleTitle(width, model, index),
-                                articleSourceNameAndTime(width, model, index),
-                                articleDescription(width, model, index),
-                                Spacer(),
-                                articleAuthor(
-                                    height, context, model, index, width)
-                              ],
-                            )),
-                      ),
-                    )),
-          ),
+          child: PageView.builder(
+              scrollDirection: Axis.vertical,
+              controller: _pageViewController,
+              key: PageStorageKey('storage-key'),
+              // padding: EdgeInsets.only(top: height * 0.001),
+              // separatorBuilder: (context, index) => SizedBox(
+              //       height: height * 0.001,
+              //     ),
+              itemCount: model.data!.length,
+              reverse: false,
+              itemBuilder: (context, index) => GestureDetector(
+                    onTap: () async {
+                      // ExtendedNavigator(router: Router(), name: 'web-view-loader');
+                      Navigator.pushNamed(context, '/web-view-loader',
+                          arguments: WebViewLoaderRouteArgs(
+                              url: model.data![index].url,
+                              key: const Key('WebView')));
+                    },
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: width * 0.01, vertical: height * 0.02),
+                      height: height * 0.97,
+                      child: Card(
+                          elevation: 5.0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                          child: Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start, // Elements align left
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              articlePicture(height, width, model.data![index]),
+                              articleTitle(width, model, index),
+                              articleSourceNameAndTime(width, model, index),
+                              articleDescription(width, model, index),
+                              Spacer(),
+                              articleAuthor(
+                                  height, context, model, index, width)
+                            ],
+                          )),
+                    ),
+                  )),
         ),
       ],
     ));
@@ -198,15 +169,6 @@ class ArticlesViewScreen extends State<ArticlesView> {
 
   SizedBox articleAuthor(double height, BuildContext context,
       ArticlesViewModel model, int index, double width) {
-    String url;
-
-    if (kIsWeb) {
-      url = getReverseProxyLink(model.data![index].articleSource.imageUrl);
-    } else {
-      url = model.data![index].articleSource.imageUrl;
-    }
-    print(url);
-
     return SizedBox(
       height: height * 0.09,
       child: Container(
@@ -231,7 +193,7 @@ class ArticlesViewScreen extends State<ArticlesView> {
               Padding(
                 padding: EdgeInsets.only(left: width * 0.02),
                 child: Image.network(
-                  url,
+                  model.data![index].articleSource.imageUrl,
                   height: height * 0.05,
                   fit: BoxFit.contain,
                 ),
@@ -252,18 +214,6 @@ class ArticlesViewScreen extends State<ArticlesView> {
         ),
       ),
     );
-  }
-
-  String getReverseProxyLink(String imageUrl) {
-    final Uri uri = Uri.parse(imageUrl);
-    // TODO Remove the print
-    print(uri.host.split('.')[0]);
-    final String url = ('http://37.187.37.22/' +
-        (uri.host.split('.')[0] == 'www'
-            ? uri.host.split('.')[1]
-            : uri.host.split('.')[0]) +
-        uri.path);
-    return url;
   }
 
   Column loadingScreen(double height) {
@@ -463,22 +413,13 @@ class ArticlesViewScreen extends State<ArticlesView> {
   }
 
   ClipRRect articlePicture(double height, double width, Article article) {
-    String url;
-
-    if (kIsWeb) {
-      url = getReverseProxyLink(article.imageUrl);
-    } else {
-      url = article.imageUrl;
-    }
-    print(url);
-
     return ClipRRect(
         borderRadius: BorderRadius.only(
             topLeft: Radius.circular(5), topRight: Radius.circular(5)),
         child: Image(
           image: article.imageUrl == null
               ? CachedNetworkImageProvider(article.articleSource.imageUrl)
-              : CachedNetworkImageProvider(url),
+              : CachedNetworkImageProvider(article.imageUrl),
           height: height * 0.40,
           width: width * 0.96,
           alignment: Alignment.topCenter,

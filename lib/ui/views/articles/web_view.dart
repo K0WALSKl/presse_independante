@@ -1,5 +1,3 @@
-import 'dart:html' as html;
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -24,18 +22,15 @@ SafeArea articleWebScreen(double height, ArticlesViewModel model, double width,
               crossAxisSpacing: 20,
               mainAxisSpacing: 20),
           scrollDirection: Axis.vertical,
-          key: PageStorageKey('storage-key'),
+          key: const PageStorageKey('storage-key'),
           itemCount: model.data!.length,
           reverse: false,
-          itemBuilder: (context, index) => GestureDetector(
+          itemBuilder: (BuildContext context, int index) => GestureDetector(
             onTap: () async {
-              // ExtendedNavigator(router: Router(), name: 'web-view-loader');
-              kIsWeb
-                  ? html.window.open(model.data![index].url, 'new tab')
-                  : Navigator.pushNamed(context, '/web-view-loader',
-                      arguments: WebViewLoaderRouteArgs(
-                          url: model.data![index].url,
-                          key: const Key('WebViewOpenNewTab')));
+              Navigator.pushNamed(context, '/web-view-loader',
+                  arguments: WebViewLoaderRouteArgs(
+                      url: model.data![index].url,
+                      key: const Key('WebViewOpenNewTab')));
             },
             child: Container(
               padding: EdgeInsets.symmetric(
